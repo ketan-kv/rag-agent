@@ -16,6 +16,8 @@ Usage:
     python rag_cli.py add-pdf path/to/file.pdf
     python rag_cli.py add-url https://example.com/article
     python rag_cli.py add-text path/to/notes.txt
+    python rag_cli.py peek-pdf path/to/file.pdf     (debug: show raw extracted text)
+    python rag_cli.py peek-url https://example.com   (debug: show raw extracted text)
     python rag_cli.py ask "What is the main finding of the paper?"
     python rag_cli.py list
     python rag_cli.py reset
@@ -99,7 +101,34 @@ def chunk_text(text, chunk_size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):
     return [c.strip() for c in chunks if c.strip()]
 
 
-# ---------- Ingestion ----------
+# ---------- Debugging ----------
+
+def peek(source_type, path_or_url, preview_chars=1000):
+    """Show what raw text was actually extracted, before chunking/embedding.
+    Useful for diagnosing scanned PDFs, JS-heavy sites, etc."""
+    if source_type == "pdf":
+        text = load_pdf(path_or_url)
+    elif source_type == "url":
+        text = load_url(path_or_url)
+    else:
+        text = load_text_file(path_or_url)
+
+    char_count = len(text)
+    word_count = len(text.split())
+
+    print(f"\n--- PEEK: {path_or_url} ---")
+    print(f"Total extracted characters: {char_count}")
+    print(f"Total extracted words: {word_count}")
+
+    if char_count == 0:
+        print("(Nothing extracted at all.)")
+    else:
+        print(f"\nFirst {min(preview_chars, char_count)} characters:\n")
+        print(text[:preview_chars])
+        if char_count > preview_chars:
+            print(f"\n... ({char_count - preview_chars} more characters not shown)")
+    print("--- END PEEK ---\n")
+
 
 def add_document(text, source_name):
     if not text.strip():
@@ -188,6 +217,12 @@ def main():
     p_ask = sub.add_parser("ask", help="Ask a question against the store")
     p_ask.add_argument("query")
 
+    p_peek_pdf = sub.add_parser("peek-pdf", help="Show raw extracted text from a PDF (debug)")
+    p_peek_pdf.add_argument("path")
+
+    p_peek_url = sub.add_parser("peek-url", help="Show raw extracted text from a URL (debug)")
+    p_peek_url.add_argument("url")
+
     sub.add_parser("list", help="List ingested sources")
     sub.add_parser("reset", help="Delete the vector store and start fresh")
 
@@ -207,6 +242,12 @@ def main():
 
     elif args.command == "ask":
         answer(args.query)
+
+    elif args.command == "peek-pdf":
+        peek("pdf", args.path)
+
+    elif args.command == "peek-url":
+        peek("url", args.url)
 
     elif args.command == "list":
         if collection.count() == 0:
