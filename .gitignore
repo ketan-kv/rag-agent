@@ -28,6 +28,8 @@ Thumbs.db
 
 # Testing/evaluation
 test_questions.json
+test_docs
+test_urls.txt
 
 # Logs
 *.log
