@@ -25,7 +25,7 @@
 - For Generation this project uses Nemotron 3 Ultra model via the OpenRouter API Key. This model has been selected is it can perform complex reasoning tasks and has a huge context window (Upto 1M tokens). This model is free and can be used via the OpenRouter API. Alternatively, Gemini also provides free to use models through the Google AI Studio.
 - Open source models like Llama may offer better control but they hallucinate more and have lesser context windows.
 
-## Known Limitations (be honest here — this is a strength, not a weakness)
+## Known Limitations 
 - Re-ranking is not performed by the RAG Agent which means that chunks which basically say the same thing may get retrieved and the whole information about the topic is not retrieved. So the same information chunks may appear in top-k retrieval.
 - Even if the information queried is not present, top-k results are generated which do not have any relevant content to the query. Similarity threshold filtering can be implemented as a solution for this where the chunks are only retrieved only when it exceeds a certian similarity to the query.
 - pypdf cannot perform OCR hence text in images, handwritten text and information in images are not recognized.
